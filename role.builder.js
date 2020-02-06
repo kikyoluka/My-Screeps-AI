@@ -24,6 +24,18 @@ var roleBuilder = {
         creep.moveTo(sources[0], { visualizePathStyle: { stroke: '#ffaa00' } });
       }
     }
+    const target = creep.room.find(FIND_STRUCTURES, {
+      filter: object => object.hits < object.hitsMax
+    });
+
+    target.sort((a, b) => a.hits - b.hits);
+    if (creep.store.getFreeCapacity() > 0) {
+      if (target.length > 0) {
+        if (creep.repair(target[0]) == ERR_NOT_IN_RANGE) {
+          creep.moveTo(target[0]);
+        }
+      }
+    }
   }
 };
 
