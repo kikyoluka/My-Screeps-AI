@@ -142,7 +142,7 @@ const Repair = {
     const needRepair = creep.room.find(FIND_STRUCTURES, {
       filter: (structure) => {
         return (
-          structure.hits < structure.hitsMax
+          structure.hits < structure.hitsMax * 0.6
           && structure.structureType != STRUCTURE_WALL
           && structure.structureType != STRUCTURE_RAMPART
           || structure.hits < 100000
