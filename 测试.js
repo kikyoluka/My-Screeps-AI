@@ -1,7 +1,7 @@
 //harvest
 const Harvest = {
   run: function (creep) {
-    var sources = creep.room.find(FIND_SOURCES);
+    const sources = creep.room.find(FIND_SOURCES);
     const target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
       filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
     });
@@ -9,7 +9,7 @@ const Harvest = {
     if (creep.store.getFreeCapacity() == 0) {
       creep.say('填充');
       if (target.store.getFreeCapacity() == 0) {
-        creep.say('容器装满了 我丢')
+        creep.say('容器装满了，我丢')
       }
       else if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
         creep.moveTo(target);
@@ -33,7 +33,7 @@ const Harvest = {
 
 module.exports = Harvest;
 
-//Upgrader 
+//upgrader 
 const Upgrad = {
   run: function (creep) {
     const target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
@@ -59,28 +59,77 @@ const Upgrad = {
 
 module.exports = Upgrad;
 
+//Build
+const Build = {
+  /** @param {Creep} creep **/
+  run: function (creep) {
+    if (creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
+      creep.memory.building = false;
+    }
+    if (!creep.memory.building && creep.store.getFreeCapacity() == 0) {
+      creep.memory.building = true;
+    }
+
+    if (creep.memory.building) {
+      var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
+      if (targets.length) {
+        if (creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
+          creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#ffffff' } });
+        }
+      }
+    } else {
+      const target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
+      if (target) {
+        if (creep.pickup(target) == ERR_NOT_IN_RANGE) {
+          creep.moveTo(target);
+        }
+      } else {
+        var sources = creep.room.find(FIND_SOURCES);
+        if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+          creep.moveTo(sources[0], { visualizePathStyle: { stroke: '#ffaa00' } });
+        }
+      }
+    }
+
+    if (creep.store.getFreeCapacity() == 0) {
+      var storages = creep.room.find(FIND_STRUCTURES, {
+        filter: (structure) => {
+          return (structure.structureType == STRUCTURE_STORAGE)
+        }
+      });
+
+      if (creep.transfer(storages[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+        creep.moveTo(storages[0])
+      }
+    }
+  }
+}
+
+module.exports = Build;
+
+
 //Transfer 
 const Transfer = {
   run: function (creep) {
-    var roomController = creep.room.controller;
-    var sources = creep.room.find(FIND_SOURCES);
-    var containerTo = roomController.pos.findClosestByPath(FIND_STRUCTURES, {
+    const roomController = creep.room.controller;
+    const sources = creep.room.find(FIND_SOURCES);
+    const containerTo = roomController.pos.findClosestByPath(FIND_STRUCTURES, {
       filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
     });
 
-    var containerFrom0 = sources[0].pos.findClosestByPath(FIND_STRUCTURES, {
+    const containerFrom0 = sources[0].pos.findClosestByPath(FIND_STRUCTURES, {
       filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
     });
 
-    var containerFrom1 = sources[1].pos.findClosestByPath(FIND_STRUCTURES, {
+    const containerFrom1 = sources[1].pos.findClosestByPath(FIND_STRUCTURES, {
       filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
     });
 
-    var storages = creep.room.find(FIND_STRUCTURES, {
+    const storages = creep.room.find(FIND_STRUCTURES, {
       filter: (structure) => structure.structureType == STRUCTURE_STORAGE
     });
 
-    var target = creep.room.find(FIND_DROPPED_RESOURCES);
+    const target = creep.room.find(FIND_DROPPED_RESOURCES);
 
     if (creep.store.getFreeCapacity() > 0) {
       if (target) {
@@ -145,9 +194,9 @@ const Repair = {
           structure.hits < structure.hitsMax * 0.6
           && structure.structureType != STRUCTURE_WALL
           && structure.structureType != STRUCTURE_RAMPART
-          || structure.hits < 100000
+          || structure.hits < 700000
           && structure.structureType == STRUCTURE_WALL
-          || structure.hits < 100000
+          || structure.hits < 700000
           && structure.structureType == STRUCTURE_RAMPART);
       }
     });
@@ -197,14 +246,14 @@ const Tower = {
         const towers = Game.getObjectById(j.id)
 
         //找到具有治疗部件的单位
-        var healHostile = towers.pos.findClosestByRange(FIND_HOSTILE_CREEPS, {
+        const healHostile = towers.pos.findClosestByRange(FIND_HOSTILE_CREEPS, {
           filter: function (object) {
             return object.getActiveBodyparts(HEAL);
           }
         });
 
         //找到其他单位
-        var otherHostile = towers.pos.findClosestByRange(FIND_HOSTILE_CREEPS, {
+        const otherHostile = towers.pos.findClosestByRange(FIND_HOSTILE_CREEPS, {
           filter: function (object) {
             return object.getActiveBodyparts(ATTACK)
               || object.getActiveBodyparts(MOVE)
@@ -214,7 +263,7 @@ const Tower = {
         });
 
         //当修理工出现问题导致建筑耐久继续下降时启用炮塔进行紧急维修
-        var closestDamagedStructure = towers.pos.findClosestByRange(FIND_STRUCTURES, {
+        const closestDamagedStructure = towers.pos.findClosestByRange(FIND_STRUCTURES, {
           filter: (structure) => {
             return (
               structure.hits < structure.hitsMax * 0.4
@@ -278,9 +327,42 @@ const Repairs = _.filter(Game.creeps, (creep) => creep.memory.role = 'repair');
 if (Repairs.length < 1 || Repairs[0].ticksToLive < 20) {
   var newName = 'Repair' + Game.time;
   Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName,
-    {
-      memory: { role: 'repair' }
-    }
+    { memory: { role: 'repair' } }
   );
 }
 
+const Harvests = _.filter(Game.creeps, (creep) => creep.memory.role = 'harvest')
+if (Harvests.length < 1 || Repairs[0].ticksToLive < 20) {
+  var newName = 'Harvest' + Game.time;
+  Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName,
+    { memory: { role: 'harvest' } }
+  );
+}
+
+
+
+//pickup
+const Pickup = {
+  run: function (creep) {
+    var a = Game.getObjectById('a3f1a99bde0b7e20e781dcd3');
+    var b = Game.getObjectById('234d8173c3a8474bd1b38013');
+    for (var i in Game.creeps) {
+      var creep = Game.creeps[i];
+      if (creep.store.getFreeCapacity() > 0) {
+        for (var resourceType in a.store) {
+          if (creep.withdraw(a, resourceType) == ERR_NOT_IN_RANGE) {
+            creep.moveTo(a);
+          }
+        }
+      } else {
+        for (var resourceType in creep.carry) {
+          if (creep.transfer(b, resourceType) == ERR_NOT_IN_RANGE) {
+            creep.moveTo(b)
+          }
+        }
+      }
+    }
+  }
+}
+
+module.exports = Pickup
