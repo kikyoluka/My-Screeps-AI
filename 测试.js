@@ -29,8 +29,6 @@ const Harvest = {
     }
   }
 }
-
-
 module.exports = Harvest;
 
 //upgrader 
@@ -44,19 +42,20 @@ const Upgrad = {
       if (target.store.getFreeCapacity() == 2000) {
         creep.say('能量被我吃完了')
       }
-      else if (creep.store.getFreeCapacity() > 200) {
+      else if (creep.store.getFreeCapacity() > 50) {
         if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
           creep.moveTo(target)
         }
-      } else {
-        if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-          creep.moveTo(creep.room.controller);
-        }
+      }
+      else if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+        creep.moveTo(creep.room.controller);
+      }
+      else {
+        creep.say('升级中~')
       }
     }
   }
 }
-
 module.exports = Upgrad;
 
 //Build
@@ -137,18 +136,17 @@ const Transfer = {
           creep.moveTo(target[0]);
           creep.say('捡垃圾啦')
         }
+      } else if (containerFrom1.store.getFreeCapacity() < 1000) {
+        if (creep.withdraw(containerFrom1, RESOURCE_ENERGY)
+          == ERR_NOT_IN_RANGE) {
+          creep.moveTo(containerFrom1);
+          creep.say('我来S1拿能量了');
+        }
       } else if (containerFrom0.store.getFreeCapacity() < 1000) {
         if (creep.withdraw(containerFrom0, RESOURCE_ENERGY)
           == ERR_NOT_IN_RANGE) {
           creep.moveTo(containerFrom0);
           creep.say('我来S0拿能量了');
-        }
-      } else if (
-        containerFrom1.store.getFreeCapacity() < 1000) {
-        if (creep.withdraw(containerFrom1, RESOURCE_ENERGY)
-          == ERR_NOT_IN_RANGE) {
-          creep.moveTo(containerFrom1);
-          creep.say('我来S1拿能量了');
         }
       }
     } else if (containerTo.store[RESOURCE_ENERGY] > 1000) {
@@ -182,6 +180,7 @@ const Repair = {
 
 
     const needBuild = creep.room.find(FIND_CONSTRUCTION_SITES);
+    const pickupEnergy = creep.room.find(FIND_DROPPED_RESOURCES);
 
     /**
      * wall < 100K 
@@ -203,11 +202,12 @@ const Repair = {
 
     if (creep.store.getFreeCapacity() > 200) {
       if (creep.withdraw(target[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(target[0])
+        creep.say('我来拿资源啦~');
+        creep.moveTo(target[0]);
       }
     } else if (targets[0]) {
-      creep.say('填充')
       if (creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+        creep.say('填充能量')
         creep.moveTo(targets[0]);
       }
     } else if (needRepair[0]) {
@@ -216,14 +216,20 @@ const Repair = {
         creep.moveTo(needRepair[0]);
       }
     } else if (needBuild[0]) {
-      creep.say('建造')
       if (creep.build(needBuild[0]) == ERR_NOT_IN_RANGE) {
+        creep.say('建造')
         creep.moveTo(needBuild[0]);
       }
     } else {
       creep.say('Zzz')
     }
 
+    if (pickupEnergy) {
+      if (creep.pickup(pickupEnergy, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+        creep.moveTo(pickupEnergy);
+        creep.say('捡垃圾')
+      }
+    }
   }
 }
 
@@ -295,50 +301,91 @@ module.exports = Tower;
 
 
 //main.js
-Tower.run();
+const Tower = require('tower');
+const Harvest = require('harvest');
+const Repair = require('repair');
+const Transfer = require('transfer');
+const Upgrad = require('upgrad');
 
-for (var i in Game.creeps) {
-  var creep = Game.creeps[i];
-  if (creep.memory.role == 'harvest') {
-    Harvest.run(creep);
+module.exports.loop = function () {
+  Tower.run();
+
+  for (var i in Game.creeps) {
+    var creep = Game.creeps[i];
+    if (creep.memory.role == 'harvest') {
+      Harvest.run(creep);
+    }
+
+    if (creep.memory.role == 'upgrad') {
+      Upgrad.run(creep);
+    }
+
+    if (creep.memory.role == 'transfer') {
+      Transfer.run(creep);
+    }
+
+    if (creep.memory.role == 'repair') {
+      Repair.run(creep);
+    }
   }
 
-  if (creep.memory.role == 'upgrad') {
-    Upgrad.run(creep);
+
+  for (var name in Memory.creeps) {
+    if (!Game.creeps[name]) {
+      delete Memory.creeps[name];
+    }
   }
 
-  if (creep.memory.role == 'transfer') {
-    Transfer.run(creep);
+
+  const Repairs = _.filter(Game.creeps, (creep) => creep.memory.role == 'repair');
+  if (Repairs.length < 1 || Repairs[0].ticksToLive < 20) {
+    var newName = 'Repair' + Game.time;
+    Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName,
+      { memory: { role: 'repair' } }
+    );
   }
 
-  if (creep.memory.role == 'repair') {
-    Repair.run(creep);
+  const S0Harvests = _.filter(Game.creeps, (creep) => creep.memory.doing == 'source0')
+  if (S0Harvests.length < 1 || S0Harvests[0].ticksToLive < 20) {
+    var newName = 'S0-Harvest' + Game.time;
+    Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName,
+      { memory: { role: 'harvest', doing: 'source0' } }
+    );
+  }
+
+  const S1Harvests = _.filter(Game.creeps, (creep) => creep.memory.doing == 'source1')
+  if (S1Harvests.length < 1 || S1Harvests[0].ticksToLive < 20) {
+    var newName = 'S1-Harvest' + Game.time;
+    Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName,
+      { memory: { role: 'harvest', doing: 'source1' } }
+    );
+  }
+
+  const Transfers = _.filter(Game.creeps, (creep) => creep.memory.role == 'transfer')
+  if (Transfers.length < 1 || Transfers[0].ticksToLive < 20) {
+    var newName = 'Transfer' + Game.time;
+    Game.spawns['Spawn1'].spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], newName,
+      { memory: { role: 'transfer' } }
+    );
+  }
+
+  const Upgrads = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrad')
+  if (Upgrads.length < 1 || Upgrads[0].ticksToLive < 20) {
+    var newName = 'Upgrad' + Game.time;
+    Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE], newName,
+      { memory: { role: 'upgrad' } }
+    );
+  }
+
+  if (Game.spawns['Spawn1'].spawning) {
+    var spawningCreep = Game.creeps[Game.spawns['Spawn1'].spawning.name];
+    Game.spawns['Spawn1'].room.visual.text(
+      '🛠️' + spawningCreep.memory.role,
+      Game.spawns['Spawn1'].pos.x + 1,
+      Game.spawns['Spawn1'].pos.y,
+      { align: 'left', opacity: 0.8 });
   }
 }
-
-
-for (var name in Memory.creeps) {
-  if (!Game.creeps[name]) {
-    delete Memory.creeps[name];
-  }
-}
-
-const Repairs = _.filter(Game.creeps, (creep) => creep.memory.role = 'repair');
-if (Repairs.length < 1 || Repairs[0].ticksToLive < 20) {
-  var newName = 'Repair' + Game.time;
-  Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName,
-    { memory: { role: 'repair' } }
-  );
-}
-
-const Harvests = _.filter(Game.creeps, (creep) => creep.memory.role = 'harvest')
-if (Harvests.length < 1 || Repairs[0].ticksToLive < 20) {
-  var newName = 'Harvest' + Game.time;
-  Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName,
-    { memory: { role: 'harvest' } }
-  );
-}
-
 
 
 //pickup
@@ -366,3 +413,13 @@ const Pickup = {
 }
 
 module.exports = Pickup
+
+
+//Attack
+const Attack = {
+  run: function (creep) {
+
+  }
+}
+
+module.exports = Attack
