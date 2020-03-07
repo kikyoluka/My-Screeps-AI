@@ -339,7 +339,7 @@ module.exports.loop = function () {
 
   const Repairs = _.filter(Game.creeps, (creep) => creep.memory.role == 'repair');
   if (Repairs.length < 1 || Repairs[0].ticksToLive < 20) {
-    var newName = 'Repair' + Game.time;
+    var newName = '全能工具姬' + Math.random().toString(16).slice(2, 6).toUpperCase() + '号';
     Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName,
       { memory: { role: 'repair' } }
     );
@@ -347,7 +347,7 @@ module.exports.loop = function () {
 
   const S0Harvests = _.filter(Game.creeps, (creep) => creep.memory.doing == 'source0')
   if (S0Harvests.length < 1 || S0Harvests[0].ticksToLive < 20) {
-    var newName = 'S0-Harvest' + Game.time;
+    var newName = '矿姬S0型' + Math.random().toString(16).slice(2, 6).toUpperCase() + '号';
     Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName,
       { memory: { role: 'harvest', doing: 'source0' } }
     );
@@ -355,15 +355,16 @@ module.exports.loop = function () {
 
   const S1Harvests = _.filter(Game.creeps, (creep) => creep.memory.doing == 'source1')
   if (S1Harvests.length < 1 || S1Harvests[0].ticksToLive < 20) {
-    var newName = 'S1-Harvest' + Game.time;
+    var newName = '矿姬S1型' + Math.random().toString(16).slice(2, 6).toUpperCase() + '号';
     Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName,
       { memory: { role: 'harvest', doing: 'source1' } }
     );
   }
 
   const Transfers = _.filter(Game.creeps, (creep) => creep.memory.role == 'transfer')
-  if (Transfers.length < 1 || Transfers[0].ticksToLive < 20) {
-    var newName = 'Transfer' + Game.time;
+  if (Transfers.length < 2 || Transfers[0].ticksToLive < 20
+    || Transfers[1].ticksToLive < 20) {
+    var newName = '运输姬' + Math.random().toString(16).slice(2, 6).toUpperCase() + '号';
     Game.spawns['Spawn1'].spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], newName,
       { memory: { role: 'transfer' } }
     );
@@ -371,19 +372,10 @@ module.exports.loop = function () {
 
   const Upgrads = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrad')
   if (Upgrads.length < 1 || Upgrads[0].ticksToLive < 20) {
-    var newName = 'Upgrad' + Game.time;
+    var newName = '升级姬' + Math.random().toString(16).slice(2, 6).toUpperCase() + '号';
     Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE], newName,
       { memory: { role: 'upgrad' } }
     );
-  }
-
-  if (Game.spawns['Spawn1'].spawning) {
-    var spawningCreep = Game.creeps[Game.spawns['Spawn1'].spawning.name];
-    Game.spawns['Spawn1'].room.visual.text(
-      '🛠️' + spawningCreep.memory.role,
-      Game.spawns['Spawn1'].pos.x + 1,
-      Game.spawns['Spawn1'].pos.y,
-      { align: 'left', opacity: 0.8 });
   }
 }
 
@@ -423,3 +415,81 @@ const Attack = {
 }
 
 module.exports = Attack
+
+
+
+
+//Creep.function
+const Harvest = require('harvest');
+const Upgrad = require('upgrad');
+const Repair = require('repair');
+const Transfer = require('transfer');
+
+const CreepFunction = {
+  run: function () {
+    for (var i in Game.creeps) {
+      var creep = Game.creeps[i];
+      switch (creep.memory.role) {
+        case 'harvest':
+          Harvest.run(creep);
+          break;
+        case 'upgrad':
+          Upgrad.run(creep);
+          break;
+        case 'repair':
+          Repair.run(creep);
+          break;
+        case 'transfer':
+          Transfer.run(creep);
+      }
+    }
+
+    for (var name in Memory.creeps) {
+      if (!Game.creeps[name]) {
+        delete Memory.creeps[name];
+      }
+    }
+
+    const Repairs = _.filter(Game.creeps, (creep) => creep.memory.role == 'repair');
+    if (Repairs.length < 1 || Repairs[0].ticksToLive < 20) {
+      var newName = '全能工具姬' + Math.random().toString(16).slice(2, 6).toUpperCase() + '号';
+      Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], newName,
+        { memory: { role: 'repair' } }
+      );
+    }
+
+    const S0Harvests = _.filter(Game.creeps, (creep) => creep.memory.doing == 'source0')
+    if (S0Harvests.length < 1 || S0Harvests[0].ticksToLive < 20) {
+      var newName = '矿姬S0型' + Math.random().toString(16).slice(2, 6).toUpperCase() + '号';
+      Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName,
+        { memory: { role: 'harvest', doing: 'source0' } }
+      );
+    }
+
+    const S1Harvests = _.filter(Game.creeps, (creep) => creep.memory.doing == 'source1')
+    if (S1Harvests.length < 1 || S1Harvests[0].ticksToLive < 20) {
+      var newName = '矿姬S1型' + Math.random().toString(16).slice(2, 6).toUpperCase() + '号';
+      Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE], newName,
+        { memory: { role: 'harvest', doing: 'source1' } }
+      );
+    }
+
+    const Transfers = _.filter(Game.creeps, (creep) => creep.memory.role == 'transfer')
+    if (Transfers.length < 2 || Transfers[0].ticksToLive < 20 || Transfers[1].ticksToLive < 20) {
+      var newName = '运输姬' + Math.random().toString(16).slice(2, 6).toUpperCase() + '号';
+      Game.spawns['Spawn1'].spawnCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], newName,
+        { memory: { role: 'transfer' } }
+      );
+    }
+
+    const Upgrads = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrad')
+    if (Upgrads.length < 1 || Upgrads[0].ticksToLive < 20) {
+      var newName = '升级姬' + Math.random().toString(16).slice(2, 6).toUpperCase() + '号';
+      Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE], newName,
+        { memory: { role: 'upgrad' } }
+      );
+    }
+  }
+}
+
+module.exports = CreepFunction;
