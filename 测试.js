@@ -62,43 +62,23 @@ module.exports = Upgrad;
 const Build = {
   /** @param {Creep} creep **/
   run: function (creep) {
-    if (creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
-      creep.memory.building = false;
-    }
-    if (!creep.memory.building && creep.store.getFreeCapacity() == 0) {
-      creep.memory.building = true;
-    }
-
-    if (creep.memory.building) {
-      var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-      if (targets.length) {
-        if (creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
-          creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#ffffff' } });
-        }
+    /**
+     * wall < 100K 
+     * rampart < 100K 
+     */
+    const needRepair = creep.room.find(FIND_STRUCTURES, {
+      filter: (structure) => {
+        return (
+          structure.structureType == STRUCTURE_WALL
+          || structureType == STRUCTURE_RAMPART)
+          && structure.hits < 1000000;
       }
-    } else {
-      const target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
-      if (target) {
-        if (creep.pickup(target) == ERR_NOT_IN_RANGE) {
-          creep.moveTo(target);
-        }
-      } else {
-        var sources = creep.room.find(FIND_SOURCES);
-        if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-          creep.moveTo(sources[0], { visualizePathStyle: { stroke: '#ffaa00' } });
-        }
-      }
-    }
+    });
 
-    if (creep.store.getFreeCapacity() == 0) {
-      var storages = creep.room.find(FIND_STRUCTURES, {
-        filter: (structure) => {
-          return (structure.structureType == STRUCTURE_STORAGE)
-        }
-      });
-
-      if (creep.transfer(storages[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(storages[0])
+    if (needRepair[0]) {
+      if (creep.repair(needRepair[0]) == ERR_NOT_IN_RANGE) {
+        creep.say('维修')
+        creep.moveTo(needRepair[0]);
       }
     }
   }
@@ -182,23 +162,6 @@ const Repair = {
     const needBuild = creep.room.find(FIND_CONSTRUCTION_SITES);
     const pickupEnergy = creep.room.find(FIND_DROPPED_RESOURCES);
 
-    /**
-     * wall < 100K 
-     * rampart < 100K 
-     * structure.hit <structure.hitx * 0.6 
-     */
-    const needRepair = creep.room.find(FIND_STRUCTURES, {
-      filter: (structure) => {
-        return (
-          structure.hits < structure.hitsMax * 0.6
-          && structure.structureType != STRUCTURE_WALL
-          && structure.structureType != STRUCTURE_RAMPART
-          || structure.hits < 700000
-          && structure.structureType == STRUCTURE_WALL
-          || structure.hits < 700000
-          && structure.structureType == STRUCTURE_RAMPART);
-      }
-    });
 
     if (creep.store.getFreeCapacity() > 200) {
       if (creep.withdraw(target[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -210,11 +173,6 @@ const Repair = {
         creep.say('填充能量')
         creep.moveTo(targets[0]);
       }
-    } else if (needRepair[0]) {
-      if (creep.repair(needRepair[0]) == ERR_NOT_IN_RANGE) {
-        creep.say('维修')
-        creep.moveTo(needRepair[0]);
-      }
     } else if (needBuild[0]) {
       if (creep.build(needBuild[0]) == ERR_NOT_IN_RANGE) {
         creep.say('建造')
@@ -224,9 +182,9 @@ const Repair = {
       creep.say('Zzz')
     }
 
-    if (pickupEnergy) {
-      if (creep.pickup(pickupEnergy, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(pickupEnergy);
+    if (pickupEnergy[0]) {
+      if (creep.pickup(pickupEnergy[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+        creep.moveTo(pickupEnergy[0]);
         creep.say('捡垃圾')
       }
     }
@@ -268,17 +226,13 @@ const Tower = {
           }
         });
 
-        //当修理工出现问题导致建筑耐久继续下降时启用炮塔进行紧急维修
         const closestDamagedStructure = towers.pos.findClosestByRange(FIND_STRUCTURES, {
           filter: (structure) => {
             return (
-              structure.hits < structure.hitsMax * 0.4
+              structure.hits < structure.hitsMax * 0.6
               && structure.structureType != STRUCTURE_WALL
               && structure.structureType != STRUCTURE_RAMPART
-              || structure.hits < 50000
-              && structure.structureType == STRUCTURE_WALL
-              || structure.hits < 50000
-              && structure.structureType == STRUCTURE_RAMPART);
+            );
           }
         });
 
@@ -424,6 +378,7 @@ const Harvest = require('harvest');
 const Upgrad = require('upgrad');
 const Repair = require('repair');
 const Transfer = require('transfer');
+const Build = require('build')
 
 const CreepFunction = {
   run: function () {
@@ -441,6 +396,9 @@ const CreepFunction = {
           break;
         case 'transfer':
           Transfer.run(creep);
+          break;
+        case 'build':
+          Build.run(creep);
       }
     }
 
@@ -493,3 +451,47 @@ const CreepFunction = {
 }
 
 module.exports = CreepFunction;
+
+
+
+
+
+switch (room.controller.level) {
+  case 1:
+    harvestBody = [WORK, WORK, CARRY, MOVE]
+    upgradBody = [WORK, WORK, CARRY, MOVE]
+    buildBody = [WORK, CARRY, CARRY, MOVE, MOVE]
+    repairBody = [WORK, CARRY, CARRY, MOVE, MOVE]
+    transferBody = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE]
+    break;
+  case 2:
+    harvestBody = [WORK, WORK, WORK, CARRY, MOVE]
+    upgradBody = [WORK, WORK, WORK, CARRY, MOVE]
+    buildBody = [WORK, WORK, CARRY, CARRY, MOVE, MOVE]
+    repairBody = [WORK, WORK, CARRY, CARRY, MOVE, MOVE]
+    transferBody = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE]
+    break;
+  case 3:
+    harvestBody = [WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE]
+    upgradBody = [WORK, WORK, WORK, WORK, CARRY, MOVE]
+    buildBody = [WORK, WORK, CARRY, CARRY, MOVE, MOVE]
+    repairBody = [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE]
+    transferBody = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE]
+    break;
+  case 4:
+  case 5:
+    harvestBody = [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE]
+    upgradBody = [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE]
+    buildBody = [WORK, WORK, CARRY, CARRY, MOVE, MOVE]
+    repairBody = [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE]
+    transferBody = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE]
+    break;
+  case 6:
+  case 7:
+  case 8:
+    harvestBody = [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE]
+    upgradBody = [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE]
+    buildBody = [WORK, WORK, CARRY, CARRY, MOVE, MOVE]
+    repairBody = [WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE]
+    transferBody = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE]
+}
