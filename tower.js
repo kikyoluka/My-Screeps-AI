@@ -1,59 +1,73 @@
-const Tower = {
+import { setBodyParts, getAvaliableSpawn } from 'utils'
+
+const TowerConfig = {
+  /* tower配置 */
   run: function () {
-    for (var i in Game.rooms) {
-      if (!Game.rooms[i].memory.tower) {
-        Game.rooms[i].memory.tower = Game.rooms[i].find(FIND_STRUCTURES, {
-          filter: (structure) => {
-            return structure.structureType == STRUCTURE_TOWER;
+    const searchInterval = 5
+    let myRooms = Memory.roomConfig.myRomm
+    for (var i in myRooms) {
+      /* tower检测 */
+      let searchTower = Game.getObjectById(Memory.roomConfig[myRooms[i]].searchTower.id)
+      let towers = Game.rooms[myRooms[i]].find(FIND_STRUCTURES, {
+        filter: (s) => s.structureType == STRUCTURE_TOWER && s.id !== searchTower.id
+      })
+
+      if (Game.time % searchInterval == 0) {
+        let hostiles = searchTower.room.find(FIND_HOSTILE_CREEPS, {
+          filter: (s) => !s.body.boost
+        })
+
+        let boostHostile = searchTower.room.find(FIND_HOSTILE_CREEPS, {
+          filter: (s) => s.body.boost
+        })
+
+        if (boostHostile.length >= 4) {
+          /* 四人小队 启动 war */
+          Memory.roomConfig[myRooms[i]].war = true
+        } else if (boostHostile.length >= 2) {
+          /* 两人小队 search牵制heal towers激活attack */
+          let healBoost = boostHostile.filter(x => x.body.getActiveBodyparts(HEAL) !== 0)
+          let attackBoost = boostHostile.filter(x => x.body.getActiveBodyparts(HEAL) == 0)
+          towers.attack(attackBoost[0])
+          searchTower.attack(healBoost[0])
+        } else if (boostHostile.length > 0) {
+          towers.attack(boostHostile[0])
+          searchTower.attack(boostHostile[0])
+        } else if (hostiles.length > 0) {
+          towers.attack(hostiles[0])
+          searchTower.attack(hostiles[0])
+        } else {
+          let ramparts = searchTower.room.find(FIND_STRUCTURES, {
+            filter: (s) => s.structureType == STRUCTURE_RAMPART && s.hitx <= 1000000
+          })
+
+          if (ramparts) {
+            towers.repair(ramparts[0])
           }
-        });
+        }
       }
 
-      for (var j of Game.rooms[i].memory.tower) {
-        const towers = Game.getObjectById(j.id)
+      /* war模式  主动防御 */
+      if (Memory.roomConfig[myRooms[i]].war) {
+        /* tower全部修墙 */
+        let ramparts = Game.rooms[myRooms[i]].find(FIND_STRUCTURES, {
+          filter: (s) => s.structureType == STRUCTURE_RAMPART && s.hitx <= 1000000
+        })
 
-        //找到具有治疗部件的单位
-        const healHostile = towers.pos.findClosestByRange(FIND_HOSTILE_CREEPS, {
-          filter: function (object) {
-            return object.getActiveBodyparts(HEAL);
-          }
-        });
-
-        //找到其他单位
-        const otherHostile = towers.pos.findClosestByRange(FIND_HOSTILE_CREEPS, {
-          filter: function (object) {
-            return object.getActiveBodyparts(ATTACK)
-              || object.getActiveBodyparts(MOVE)
-              || object.getActiveBodyparts(RANGED_ATTACK)
-              || object.getActiveBodyparts(TOUGH)
-          }
-        });
-
-        //当修理工出现问题导致建筑耐久继续下降时启用炮塔进行紧急维修
-        const closestDamagedStructure = towers.pos.findClosestByRange(FIND_STRUCTURES, {
-          filter: (structure) => {
-            return (
-              structure.hits < structure.hitsMax * 0.4
-              && structure.structureType != STRUCTURE_WALL
-              && structure.structureType != STRUCTURE_RAMPART
-              || structure.hits < 50000
-              && structure.structureType == STRUCTURE_WALL
-              || structure.hits < 50000
-              && structure.structureType == STRUCTURE_RAMPART);
-          }
-        });
-
-        //如果有治疗单位 优先攻击
-        if (healHostile) {
-          towers.attack(healHostile);
-        } else if (otherHostile) {
-          towers.attack(otherHostile);
-        } else if (closestDamagedStructure) {
-          towers.repair(closestDamagedStructure);
+        if (ramparts) {
+          towers.repair(ramparts[0])
         }
+        /* 生产 builder修墙 */
+        let spawns = getAvaliableSpawn(myRooms[i])
+        let bodys = setBodyParts(Game.rooms[myRooms[i]].controller.level).builderBody
+        let name = `${myRooms[i]} + 维修姬 + ${Math.random(0, 999)} + 号`;
+        spawns.spawnCreep(bodys, name, {
+          memory: { roleName: roleBuilder, warStatus: true }
+        })
       }
     }
   }
 }
 
-module.exports = Tower;
+
+module.exports = TowerConfig
