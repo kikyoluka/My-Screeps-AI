@@ -1,8 +1,8 @@
-const Pc = {
+const PcConfig = {
   run: function () {
 
   }
 }
 
 
-module.exports = Pc
+module.exports = PcConfig
