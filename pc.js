@@ -1,7 +1,7 @@
 const PcConfig = {
-  run: function () {
+    run: function () {
 
-  }
+    }
 }
 
 
