@@ -22,7 +22,7 @@ const RoomConfig = {
         if (spawn) {
           spawn.spawnCreep(bodys, name, {
             memory: {
-              roleName: 'roleHarvester'
+              roleName: 'roleHarvester',
             }
           })
           Memory.roomConfig[myRooms[i]].Spawnlist.harvester.count++
@@ -263,15 +263,17 @@ const RoomConfig = {
         let bodys = setBodyParts(Game.rooms[myRooms[i]].controller.level).depositBody
         let name = `${myRooms[i]} + Deposit矿姬 + ${Math.random(0, 999)} + 号`
         spawn.spawnCreep(bodys, name, {
-          memory: { roleName: 'roleDepositer' }
+          memory: {
+            roleName: 'roleDepositer',
+            roomName: myRooms[i],
+            deRoom: deRoom,
+            deId: deId,
+            deType: type
+          }
         });
-        if (Game.time % spawn.Spawning.remainingTime == 0) {
-          _deHarvester(myRooms[i], deRoom, deId, type)
-        }
       }
     }
   },
-
 }
 
 module.exports = RoomConfig

@@ -25,7 +25,7 @@ const TowerConfig = {
           /* 四人小队 启动 war */
           Memory.roomConfig[myRooms[i]].war = true
         } else if (boostHostile.length >= 2) {
-          /* 两人小队 search牵制heal towers激活attack */
+          /* 两人小队 search 牵制 heal towers 集火 attack */
           let healBoost = boostHostile.filter(x => x.body.getActiveBodyparts(HEAL) !== 0)
           let attackBoost = boostHostile.filter(x => x.body.getActiveBodyparts(HEAL) == 0)
           towers.attack(attackBoost[0])

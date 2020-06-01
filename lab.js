@@ -30,7 +30,11 @@ function labReactor (roomName) {
 }
 
 function CreepBoost (creep) {
-
+  if (creep.memory.needBoost) {
+    if (lab1.boostCreep(creep) == ERR_NOT_IN_RANGE) {
+      creep.moveTo(lab1)
+    }
+  }
 }
 
 

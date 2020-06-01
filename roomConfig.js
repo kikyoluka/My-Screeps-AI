@@ -1,8 +1,8 @@
 Memory.roomConfig = {
   myRoom: ['E48S14', 'E49S14', 'E49S15', 'E49S16', 'E48S16', 'E47S16'],
   E48S14: {
-    Source1: { x: 26, y: 10, id: '5bbcafe39099fc012e63b575' },
-    Source2: { x: 24, y: 10, id: '5bbcafe39099fc012e63b574' },
+    Source0: { x: 26, y: 10, id: '5bbcafe39099fc012e63b575' },
+    Source1: { x: 24, y: 10, id: '5bbcafe39099fc012e63b574' },
     Mineral: { x: 30, y: 2, id: '5bbcb6a6d867df5e54207a63', type: 'K' },
     Controller: { x: 23, y: 31, id: '5bbcafe39099fc012e63b576' },
     Factory: { x: 27, y: 17, id: '5e7cf298427ea0ad538dd1d6' },
