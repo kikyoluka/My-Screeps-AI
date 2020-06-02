@@ -1,5 +1,5 @@
 const TaskConfig = {
-    basicTask: function (roomName) {
+    basicEnergyTask: function (roomName) {
         let Task = []
         /* extensionTask */
         let extensions;
@@ -132,15 +132,23 @@ const TaskConfig = {
             })
         }
 
-        let Task = [{ targetId: 4, priority: 1 }, { targetId: 1, priority: 3 }, { targetId: 3, priority: 0 }, { targetId: 1, priority: 4 }, { targetId: 2, priority: 2 }];
-        Task.sort((a, b) => a.priority - b.priority)
-        creep._workTask[0]
+        return Task.sort((a, b) => a.priority - b.priority)
+    },
+
+    advancedEnergyTask: function (roomName) {
+        let Task = []
+
+        /* labTask */
+
+        /* factoryTask */
+
+        /* terminalTask */
+
     },
 
 
-    advancedTask: function (roomName) {
+    attackTask: function () {
         let Task = []
-
     }
 }
 

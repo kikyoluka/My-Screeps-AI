@@ -1,4 +1,4 @@
-Memory.roomConfig = {
+const RoomConfig = {
     myRoom: ['E48S14', 'E49S14', 'E49S15', 'E49S16', 'E48S16', 'E47S16'],
     E48S14: {
         Source0: { x: 26, y: 10, id: '5bbcafe39099fc012e63b575' },
@@ -19,13 +19,13 @@ Memory.roomConfig = {
             boost: { status: false, target: '', labName: '' }
         },
         Spawnlist: {
-            harvester: { count: 0, memory: roleHarvester },
-            filler: { count: 0, memory: roleFillter },
-            upgrader: { count: 0, memory: roleUpgrader },
-            builder: { count: 0, memory: roleBuilder },
-            transfer: { count: 0, memory: roleTransfer },
-            centerFiller: { count: 0, memory: roleCenterFiller },
-            repair: { count: 0, memory: roleRepair }
+            harvester: { count: 0 },
+            filler: { count: 0 },
+            upgrader: { count: 0 },
+            builder: { count: 0 },
+            transfer: { count: 0 },
+            centerFiller: { count: 0 },
+            repair: { count: 0 }
         },
         searchTower: { x: 0, y: 0, id: '' },
         powerBanks: {
@@ -53,5 +53,4 @@ Memory.roomConfig = {
     }
 };
 
-
-module.exports = Memory.roomConfig
+module.exports = RoomConfig
