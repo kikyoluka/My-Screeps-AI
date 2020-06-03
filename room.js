@@ -1,7 +1,7 @@
 import { setBodyParts, getAvaliableSpawn } from 'utils'
 import { LabReaction, CreepBoost } from 'lab'
 
-const RoomConfig = {
+module.exports = {
     /* 自动生成房间基础单位 */
     run: function () {
         const obsearch = 50;
@@ -275,5 +275,3 @@ const RoomConfig = {
         }
     },
 }
-
-module.exports = RoomConfig
