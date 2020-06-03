@@ -1,6 +1,6 @@
 function labReactor (roomName) {
-    let lab1 = Game.getObjectById(Memory.roomConfig[roomName].Labs.lab1.id)
-    let lab6 = Game.getObjectById(Memory.roomConfig[roomName].Labs.lab6.id)
+    let lab1 = Game.getObjectById(Memory.roomConfig[roomName].labs.lab1.id)
+    let lab6 = Game.getObjectById(Memory.roomConfig[roomName].labs.lab6.id)
     let labs = Game.rooms[roomName].find(FIND_STRUCTURES, {
         filter: (s) => {
             return (

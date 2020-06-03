@@ -190,6 +190,7 @@ for (var name of myRooms) {
             status: false
         }
     }
+    console.log('deposit is Already')
 
     !Memory.roomConfig.name.war ?
         Memory.roomConfig.name.war = false : console.log('war is Already')

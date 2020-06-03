@@ -18,7 +18,9 @@ const stateScanner = function () {
     // bucket 当前剩余量
     Memory.stats.bucket = Game.cpu.bucket
 
-    console.log(`CPU当前使用量: ${Memory.stats.cpu}, bucker当前剩余量: ${Memory.stats.bucket}`)
+    if (Game.time % 10 == 0) {
+        console.log(`CPU当前使用量: ${Memory.stats.cpu}, bucket当前剩余量: ${Memory.stats.bucket}`)
+    }
 }
 
 module.exports = stateScanner;

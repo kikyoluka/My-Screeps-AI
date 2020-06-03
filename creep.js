@@ -52,8 +52,8 @@ const CreepConfig = {
      */
     _fill: function (creep) {
         let targets;
-        const storages = Game.getObjectById(Memory.roomConfig[creep.room.name].Storage.id)
-        const terminals = Game.getObjectById(Memory.roomConfig[creep.room.name].Terminal.id)
+        const storages = Game.getObjectById(Memory.roomConfig[creep.room.name].storage.id)
+        const terminals = Game.getObjectById(Memory.roomConfig[creep.room.name].terminal.id)
 
         if (!targets) {
             targets = creep.room.find(FIND_STRUCTURES, {
@@ -81,7 +81,7 @@ const CreepConfig = {
 
         if (!creep.memory.fillStatus) {
             targets = null
-            if (Memory.roomConfig[creep.room.name].Storage.overflow) {
+            if (Memory.roomConfig[creep.room.name].storage.overflow) {
                 creep.store[RESOURCE_ENERGY] == 0 ?
                     creep._widthdraw(storages, RESOURCE_ENERGY) : creep._transfer(terminals, RESOURCE_ENERGY)
             }
@@ -89,7 +89,7 @@ const CreepConfig = {
 
         if (creep.ticksToLive <= 20) {
             creep.say('🔪 awsl')
-            Memory.roomConfig[creep.room.name].Spawnlist.filler.count == 0
+            Memory.roomConfig[creep.room.name].spawnList.filler.count == 0
         }
     },
 
@@ -100,9 +100,9 @@ const CreepConfig = {
     _harvest: function (creep) {
         let status;
         let sources;
-        const sources0 = Game.getObjectById(Memory.roomConfig[creep.room.name].Sources0.id)
-        const sources1 = Game.getObjectById(Memory.roomConfig[creep.room.name].Sources1.id)
-        const storages = Game.getObjectById(Memory.roomConfig[creep.room.name].Storage.id)
+        const sources0 = Game.getObjectById(Memory.roomConfig[creep.room.name].sources0.id)
+        const sources1 = Game.getObjectById(Memory.roomConfig[creep.room.name].sources1.id)
+        const storages = Game.getObjectById(Memory.roomConfig[creep.room.name].storage.id)
 
         if (sources0.energy == 0) {
             sources = sources1
@@ -140,14 +140,14 @@ const CreepConfig = {
             }
             /* 找到link就填link */
             if (sendLink.store[RESOURCE_ENERGY] >= 100) {
-                let centerLink = Game.getObjectById(Memory.roomConfig[creep.room.name].Centerlink.id)
+                let centerLink = Game.getObjectById(Memory.roomConfig[creep.room.name].centerLink.id)
                 sendLink.transferEnergy(centerLink)
             }
         }
 
         if (creep.ticksToLive <= 20) {
             creep.say('🔪 awsl')
-            Memory.roomConfig[creep.room.name].Spawnlist.harvester.count == 0
+            Memory.roomConfig[creep.room.name].spawnList.harvester.count == 0
         }
     },
 
@@ -157,8 +157,8 @@ const CreepConfig = {
      */
     _upgrad: function (creep) {
         /* 枢纽升级 */
-        const controller = Game.getObjectById(Memory.roomConfig[creep.room.name].Controller.id)
-        const linkTarget = Game.getObjectById(Memory.roomConfig[creep.room.name].ControllerLink.id)
+        const controller = Game.getObjectById(Memory.roomConfig[creep.room.name].controller.id)
+        const linkTarget = Game.getObjectById(Memory.roomConfig[creep.room.name].controllerLink.id)
 
         creep.store[RESOURCE_ENERGY] == 0 ?
             creep._widthdraw(linkTarget, RESOURCE_ENERGY) : creep._upgradeController(controller)
@@ -169,7 +169,7 @@ const CreepConfig = {
      * @param {Object} creep 
      */
     _build: function (creep) {
-        const storages = Game.getObjectById(Memory.roomConfig[creep.room.name].Storage.id)
+        const storages = Game.getObjectById(Memory.roomConfig[creep.room.name].storage.id)
         let targets;
         if (!targets) {
             targets = creep.room.find(FIND_CONSTRUCTION_SITES)
@@ -206,9 +206,9 @@ const CreepConfig = {
      */
     _centerFill: function (creep) {
         const labTime = 75
-        const storages = Game.getObjectById(Memory.roomConfig[creep.room.name].Storage.id)
-        const powers = Game.getObjectById(Memory.roomConfig[creep.room.name].PowerSpawn.id)
-        const nukers = Game.getObjectById(Memory.roomConfig[creep.room.name].Nuker.id)
+        const storages = Game.getObjectById(Memory.roomConfig[creep.room.name].storage.id)
+        const powers = Game.getObjectById(Memory.roomConfig[creep.room.name].powerSpawn.id)
+        const nukers = Game.getObjectById(Memory.roomConfig[creep.room.name].nuker.id)
 
         /* power填充 */
         if (powers.store[RESOURCE_ENERGY] < 2000) {
@@ -261,7 +261,7 @@ const CreepConfig = {
 
         if (creep.ticksToLive <= 20) {
             creep.say('🔪 awsl')
-            Memory.roomConfig[creep.room.name].Spawnlist.centerFiller.count == 0
+            Memory.roomConfig[creep.room.name].spawnList.centerFiller.count == 0
         }
     },
 
@@ -270,8 +270,8 @@ const CreepConfig = {
      * @param {Object} creep 
      */
     _transfer: function (creep) {
-        const storages = Game.getObjectById(Memory.roomConfig[creep.room.name].Storage.id)
-        const links = Game.getObjectById(Memory.roomConfig[creep.room.name].Centerlink.id)
+        const storages = Game.getObjectById(Memory.roomConfig[creep.room.name].storage.id)
+        const links = Game.getObjectById(Memory.roomConfig[creep.room.name].centerLink.id)
         let resource = creep.room.find(FIND_DROPPED_RESOURCES)
 
         /* 中央link有能量就拿 没有就捡垃圾 */
@@ -287,7 +287,7 @@ const CreepConfig = {
 
         if (creep.ticksToLive <= 20) {
             creep.say('🔪 awsl')
-            Memory.roomConfig[creep.room.name].Spawnlist.transfer.count == 0
+            Memory.roomConfig[creep.room.name].spawnList.transfer.count == 0
         }
     },
 
@@ -296,7 +296,7 @@ const CreepConfig = {
      * @param {Object} creep 
      */
     _repair: function (creep) {
-        const storages = Game.getObjectById(Memory.roomConfig[creep.room.name].Storage.id)
+        const storages = Game.getObjectById(Memory.roomConfig[creep.room.name].storage.id)
         let targets = creep.room.find(FIND_STRUCTURES, {
             filter: (s) => s.structureType == STRUCTURE_RAMPART && s.hits <= 11000000
         })
@@ -362,23 +362,23 @@ const CreepConfig = {
      */
     _pbAttacker: function (creep) {
         const roomName = creep.memory.roomName
-        const target = Game.getObjectById(Memory.roomConfig[roomName].PowerBanks.id)
-        if (!Memory.roomConfig[roomName].powerBanks.run.attack) {
+        const target = Game.getObjectById(Memory.roomConfig[roomName].powerBank.id)
+        if (!Memory.roomConfig[roomName].powerBank.run.attack) {
             if (creep.pos.isNearTo(target)) {
                 creep.say('⚔ ready')
-                Memory.roomConfig[roomName].powerBanks.run.attack = true
+                Memory.roomConfig[roomName].powerBank.run.attack = true
             } else {
                 creep.moveTo(target)
             }
         }
 
-        if (Memory.roomConfig[roomName].powerBanks.run.ready) {
+        if (Memory.roomConfig[roomName].powerBank.run.ready) {
             creep.attack(target)
             creep.say(`还剩 + ${target.hits} , 需要 ${target.hits / 1200} tick`)
         }
 
         if (target.hits <= 10000 || target.hits / 1200 <= 100) {
-            Memory.roomConfig[roomName].powerBanks.run.transfer = true
+            Memory.roomConfig[roomName].powerBank.run.transfer = true
         }
     },
 
@@ -396,20 +396,20 @@ const CreepConfig = {
             })
         }
 
-        if (!Memory.roomConfig[roomName].powerBanks.run.heal) {
+        if (!Memory.roomConfig[roomName].powerBank.run.heal) {
             if (creep.pos.isNearTo(target)) {
                 creep.say('🔧 ready')
-                Memory.roomConfig[roomName].powerBanks.run.heal = true
+                Memory.roomConfig[roomName].powerBank.run.heal = true
             } else {
                 creep.moveTo(target)
             }
         }
 
-        if (Memory.roomConfig[roomName].powerBanks.run.attack && Memory.roomConfig[roomName].powerBanks.run.heal) {
-            Memory.roomConfig[roomName].powerBanks.run.ready = true
+        if (Memory.roomConfig[roomName].powerBank.run.attack && Memory.roomConfig[roomName].powerBank.run.heal) {
+            Memory.roomConfig[roomName].powerBank.run.ready = true
         }
 
-        if (Memory.roomConfig[roomName].powerBanks.run.ready) {
+        if (Memory.roomConfig[roomName].powerBank.run.ready) {
             creep.heal(target)
         }
     },
@@ -421,9 +421,9 @@ const CreepConfig = {
      * @param {String} pbId 
      */
     _pbTransfer: function (creep) {
-        const terminals = Game.getObjectById(Memory.roomConfig[creep.memory.roomName].Terminal.id)
-        const target = Game.getObjectById(Memory.roomConfig[creep.room.name].PowerBanks.id)
-        const pbRoom = Memory.roomConfig[creep.room.name].PowerBanks.roomName
+        const terminals = Game.getObjectById(Memory.roomConfig[creep.memory.roomName].terminal.id)
+        const target = Game.getObjectById(Memory.roomConfig[creep.room.name].powerBank.id)
+        const pbRoom = Memory.roomConfig[creep.room.name].powerBank.roomName
         if (target) {
             creep.moveTo(target)
         } else {
@@ -441,9 +441,9 @@ const CreepConfig = {
      * @param {String} type 矿物类型
      */
     _deHarvester: function (creep) {
-        const terminals = Game.getObjectById(Memory.roomConfig[creep.memory.roomName].Terminal.id)
-        const target = Game.getObjectById(Memory.roomConfig[creep.room.name].deposits.id)
-        const type = Memory.roomConfig[creep.room.name].deposits.type
+        const terminals = Game.getObjectById(Memory.roomConfig[creep.memory.roomName].terminal.id)
+        const target = Game.getObjectById(Memory.roomConfig[creep.room.name].deposit.id)
+        const type = Memory.roomConfig[creep.room.name].deposit.type
         if (creep.ticksToLive <= 100) {
             creep._transfer(terminals, type)
         } else if (creep.store[Type] < getCapacity()) {
@@ -453,7 +453,7 @@ const CreepConfig = {
         }
 
         if (target.lastCooldown >= 80) {
-            Memory.roomConfig[creep.memory.roomName].deposits.status = false
+            Memory.roomConfig[creep.memory.roomName].deposit.status = false
         }
     }
 }
