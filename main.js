@@ -8,6 +8,7 @@ module.exports.loop = function () {
     require('pcConfig').work()
     require('tower').run()
     require('room').run()
+    require('task').basicEnergyTask()
     require('creep').CreepConfig._run()
 
     labCtrl.run('E49S15', RESOURCE_GHODIUM, 2000)
