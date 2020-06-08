@@ -139,7 +139,7 @@ const CreepConfig = {
                 creep._transfer(sendLink, RESOURCE_ENERGY)
             }
             /* 找到link就填link */
-            if (sendLink.store[RESOURCE_ENERGY] >= 100) {
+            if (sendLink.store[RESOURCE_ENERGY] >= 450) {
                 let centerLink = Game.getObjectById(Memory.roomConfig[creep.room.name].centerLink.id)
                 sendLink.transferEnergy(centerLink)
             }
